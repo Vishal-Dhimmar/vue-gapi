@@ -26,14 +26,15 @@ var GoogleAuthService = function GoogleAuthService () {
   this.authenticated = this.isAuthenticated();
   this.authInstance = null;
 
+  this.offlineAccessCode = null;
+  this.getOfflineAccessCode = this.getOfflineAccessCode.bind(this);
+  this.grantOfflineAccess = this.grantOfflineAccess.bind(this);
   this.login = this.login.bind(this);
   this.refreshToken = this.refreshToken.bind(this);
-  this.setSession = this.setSession.bind(this);
   this.logout = this.logout.bind(this);
   this.isAuthenticated = this.isAuthenticated.bind(this);
 };
 
-// NOTE: handle expiresAt method, this is private
 GoogleAuthService.prototype._expiresAt = function _expiresAt (authResult) {
   return JSON.stringify(authResult.expires_in * 1000 + new Date().getTime())
 };
@@ -67,14 +68,41 @@ GoogleAuthService.prototype._clearStorage = function _clearStorage () {
   localStorage.removeItem('gapi.email');
 };
 
+GoogleAuthService.prototype._setOfflineAccessCode = function _setOfflineAccessCode (authResult) {
+  if (authResult.code) {
+    this.offlineAccessCode = authResult.code;
+  } else {
+    throw new Error('Offline access code missing from result', authResult)
+  }
+};
+
+GoogleAuthService.prototype._setSession = function _setSession (response) {
+  var profile = this.authInstance.currentUser.get().getBasicProfile();
+  var authResult = response.Zi;
+  this._setStorage(authResult, profile);
+  this.authenticated = true;
+};
+
+GoogleAuthService.prototype.getOfflineAccessCode = function getOfflineAccessCode () {
+  return this.offlineAccessCode
+};
+
+GoogleAuthService.prototype.grantOfflineAccess = function grantOfflineAccess (event) {
+  if (!this.authInstance) { throw new Error('gapi not initialized') }
+  return this.authInstance.grantOfflineAccess()
+    .then(this._setOfflineAccessCode.bind(this))
+};
+
 GoogleAuthService.prototype.login = function login (event) {
+  if (!this.authInstance) { throw new Error('gapi not initialized') }
   return this.authInstance.signIn()
-    .then(this.setSession)
+    .then(this._setSession.bind(this))
 };
 
 GoogleAuthService.prototype.refreshToken = function refreshToken (event) {
     var this$1 = this;
 
+  if (!this.authInstance) { throw new Error('gapi not initialized') }
   var GoogleUser = this.authInstance.currentUser.get();
   GoogleUser.reloadAuthResponse()
     .then(function (authResult) {
@@ -83,17 +111,10 @@ GoogleAuthService.prototype.refreshToken = function refreshToken (event) {
 };
 
 GoogleAuthService.prototype.logout = function logout (event) {
+  if (!this.authInstance) { throw new Error('gapi not initialized') }
   this.authInstance.signOut(function (response) { return console.log(response); });
   this._clearStorage();
   this.authenticated = false;
-};
-
-GoogleAuthService.prototype.setSession = function setSession (response) {
-  var profile = this.authInstance.currentUser.get().getBasicProfile();
-  var authResult = response.Zi;
-
-  this._setStorage(authResult, profile);
-  this.authenticated = true;
 };
 
 GoogleAuthService.prototype.isAuthenticated = function isAuthenticated () {
@@ -103,13 +124,21 @@ GoogleAuthService.prototype.isAuthenticated = function isAuthenticated () {
 
 GoogleAuthService.prototype.getUserData = function getUserData () {
   return {
+    id: localStorage.getItem('gapi.id'),
     firstName: localStorage.getItem('gapi.first_name'),
     lastName: localStorage.getItem('gapi.last_name'),
-    email: localStorage.getItem('gapi.email')
+    fullName: localStorage.getItem('gapi.full_name'),
+    email: localStorage.getItem('gapi.email'),
+    imageUrl: localStorage.getItem('gapi.image_url'),
+    expiresAt: localStorage.getItem('gapi.expires_at'),
+    accessToken: localStorage.getItem('gapi.access_token'),
+    idToken: localStorage.getItem('gapi.id_token')
   }
 };
 
 var googleAuthService = new GoogleAuthService();
+var grantOfflineAccess = googleAuthService.grantOfflineAccess;
+var getOfflineAccessCode = googleAuthService.getOfflineAccessCode;
 var login = googleAuthService.login;
 var logout = googleAuthService.logout;
 var isAuthenticated = googleAuthService.isAuthenticated;
@@ -124,7 +153,7 @@ var VueGAPI = {
       gapiPromise.then(function (_) {
         var gapi = window.gapi;
         if (!gapi) {
-          console.error('Failed to load GAPI!');
+          console.error('Failed to load gapi!');
           return
         }
         if (!gapi.auth) {
@@ -135,6 +164,13 @@ var VueGAPI = {
                 console.info('gapi client initialised.');
                 googleAuthService.authInstance = gapi.auth2.getAuthInstance();
                 resolve(gapi);
+              })
+              .catch(function (err) {
+                if (err.error) {
+                  var error = err.error;
+                  console.error(
+                    'Failed to initialize gapi: %s (status=%s, code=%s)', error.message, error.status, error.code, err);
+                }
               });
           });
         } else {
@@ -143,35 +179,52 @@ var VueGAPI = {
       });
     };
 
-    Vue.prototype.$getGapiClient = function () {
-      return new Promise(function (resolve, reject) {
-        if (
-          Vue.gapiLoadClientPromise &&
-          Vue.gapiLoadClientPromise.status === 0
-        ) {
-          // promise is being executed
-          resolve(Vue.gapiLoadClientPromise);
-        } else {
-          resolveAuth2Client(resolve, reject);
-        }
-      })
+    Vue.prototype.$gapi = {
+      getGapiClient: function () {
+        return new Promise(function (resolve, reject) {
+          if (
+            Vue.gapiLoadClientPromise &&
+            Vue.gapiLoadClientPromise.status === 0
+          ) {
+            // promise is being executed
+            resolve(Vue.gapiLoadClientPromise);
+          } else {
+            resolveAuth2Client(resolve, reject);
+          }
+        })
+      },
+      getOfflineAccessCode: getOfflineAccessCode,
+      grantOfflineAccess: function () {
+        return Vue.prototype.$getGapiClient().then(grantOfflineAccess)
+      },
+      login: function () {
+        return Vue.prototype.$getGapiClient().then(login)
+      },
+      refreshToken: function () {
+        return Vue.prototype.$getGapiClient().then(refreshToken)
+      },
+      logout: function () {
+        return Vue.prototype.$getGapiClient().then(logout)
+      },
+      isAuthenticated: isAuthenticated,
+      getUserData: getUserData
     };
 
-    Vue.prototype.$login = function () {
-      return Vue.prototype.$getGapiClient().then(login)
-    };
+    Vue.prototype.$getGapiClient = Vue.prototype.$gapi.getGapiClient;
 
-    Vue.prototype.$refreshToken = function () {
-      return Vue.prototype.$getGapiClient().then(refreshToken)
-    };
+    Vue.prototype.$getOfflineAccessCode = Vue.prototype.$gapi.getOfflineAccessCode;
 
-    Vue.prototype.$logout = function () {
-      return Vue.prototype.$getGapiClient().then(logout)
-    };
+    Vue.prototype.$grantOfflineAccess = Vue.prototype.$gapi.grantOfflineAccess;
 
-    Vue.prototype.$isAuthenticated = isAuthenticated;
+    Vue.prototype.$login = Vue.prototype.$gapi.login;
 
-    Vue.prototype.$getUserData = getUserData;
+    Vue.prototype.$refreshToken = Vue.prototype.$gapi.refreshToken;
+
+    Vue.prototype.$logout = Vue.prototype.$gapi.logout;
+
+    Vue.prototype.$isAuthenticated = Vue.prototype.$gapi.isAuthenticated;
+
+    Vue.prototype.$getUserData = Vue.prototype.$gapi.getUserData;
   }
 };
 
