@@ -4,6 +4,9 @@ export default class GoogleAuthService {
     this.authenticated = this.isAuthenticated()
     this.authInstance = null
 
+    this.offlineAccessCode = null
+    this.getOfflineAccessCode = this.getOfflineAccessCode.bind(this)
+    this.grantOfflineAccess = this.grantOfflineAccess.bind(this)
     this.login = this.login.bind(this)
     this.refreshToken = this.refreshToken.bind(this)
     this.logout = this.logout.bind(this)
@@ -41,11 +44,29 @@ export default class GoogleAuthService {
     localStorage.removeItem('gapi.email')
   }
 
+  _setOfflineAccessCode (authResult) {
+    if (authResult.code) {
+      this.offlineAccessCode = authResult.code
+    } else {
+      throw new Error('Offline access code missing from result', authResult)
+    }
+  }
+
   _setSession (response) {
     const profile = this.authInstance.currentUser.get().getBasicProfile()
     const authResult = response.Zi
     this._setStorage(authResult, profile)
     this.authenticated = true
+  }
+
+  getOfflineAccessCode () {
+    return this.offlineAccessCode
+  }
+
+  grantOfflineAccess (event) {
+    if (!this.authInstance) throw new Error('gapi not initialized')
+    return this.authInstance.grantOfflineAccess()
+      .then(this._setOfflineAccessCode.bind(this))
   }
 
   login (event) {
