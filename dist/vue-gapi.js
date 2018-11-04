@@ -153,6 +153,8 @@ var refreshToken = googleAuthService.refreshToken;
 
 var VueGAPI = {
   install: function (Vue, clientConfig) {
+    var this$1 = this;
+
     Vue.gapiLoadClientPromise = null;
 
     var resolveAuth2Client = function (resolve, reject) {
@@ -201,36 +203,92 @@ var VueGAPI = {
       },
       getOfflineAccessCode: getOfflineAccessCode,
       grantOfflineAccess: function () {
-        return Vue.prototype.$getGapiClient().then(grantOfflineAccess)
+        return this$1.$getGapiClient().then(grantOfflineAccess)
       },
       login: function () {
-        return Vue.prototype.$getGapiClient().then(login)
+        return this$1.$getGapiClient().then(login)
       },
       refreshToken: function () {
-        return Vue.prototype.$getGapiClient().then(refreshToken)
+        return this$1.$getGapiClient().then(refreshToken)
       },
       logout: function () {
-        return Vue.prototype.$getGapiClient().then(logout)
+        return this$1.$getGapiClient().then(logout)
       },
       isAuthenticated: isAuthenticated,
       getUserData: getUserData
     };
 
-    Vue.prototype.$getGapiClient = Vue.prototype.$gapi.getGapiClient;
+    /**
+     * @deprecated since version 0.0.10.
+     * Will be removed in version 1.0.
+     */
+    Vue.prototype.$getGapiClient = function () {
+      console.warn('This Vue instance method is deprecated and will be removed in a future release. Please use $gapi.getGapiClient instead.');
+      return Vue.prototype.$gapi.getGapiClient
+    };
 
-    Vue.prototype.$getOfflineAccessCode = Vue.prototype.$gapi.getOfflineAccessCode;
+    /**
+     * @deprecated since version 0.0.10.
+     * Will be removed in version 1.0.
+     */
+    Vue.prototype.$getOfflineAccessCode = function () {
+      console.warn('This Vue instance method is deprecated and will be removed in a future release. Please use $gapi.getOfflineAccessCode instead.');
+      return Vue.prototype.$gapi.getOfflineAccessCode
+    };
 
-    Vue.prototype.$grantOfflineAccess = Vue.prototype.$gapi.grantOfflineAccess;
+    /**
+     * @deprecated since version 0.0.10.
+     * Will be removed in version 1.0.
+     */
+    Vue.prototype.$grantOfflineAccess = function () {
+      console.warn('This Vue instance method is deprecated and will be removed in a future release. Please use $gapi.grantOfflineAccess instead.');
+      return Vue.prototype.$gapi.grantOfflineAccess
+    };
 
-    Vue.prototype.$login = Vue.prototype.$gapi.login;
+    /**
+     * @deprecated since version 0.0.10.
+     * Will be removed in version 1.0.
+     */
+    Vue.prototype.$login = function () {
+      console.warn('This Vue instance method is deprecated and will be removed in a future release. Please use $gapi.login instead.');
+      return Vue.prototype.$gapi.login
+    };
 
-    Vue.prototype.$refreshToken = Vue.prototype.$gapi.refreshToken;
+    /**
+     * @deprecated since version 0.0.10.
+     * Will be removed in version 1.0.
+     */
+    Vue.prototype.$refreshToken = function () {
+      console.warn('This Vue instance method is deprecated and will be removed in a future release. Please use $gapi.refreshToken instead.');
+      return Vue.prototype.$gapi.refreshToken
+    };
 
-    Vue.prototype.$logout = Vue.prototype.$gapi.logout;
+    /**
+     * @deprecated since version 0.0.10.
+     * Will be removed in version 1.0.
+     */
+    Vue.prototype.$logout = function () {
+      console.warn('This Vue instance method is deprecated and will be removed in a future release. Please use $gapi.logout instead.');
+      return Vue.prototype.$gapi.logout
+    };
 
-    Vue.prototype.$isAuthenticated = Vue.prototype.$gapi.isAuthenticated;
+    /**
+     * @deprecated since version 0.0.10.
+     * Will be removed in version 1.0.
+     */
+    Vue.prototype.$isAuthenticated = function () {
+      console.warn('This Vue instance method is deprecated and will be removed in a future release. Please use $gapi.isAuthenticated instead.');
+      return Vue.prototype.$gapi.isAuthenticated
+    };
 
-    Vue.prototype.$getUserData = Vue.prototype.$gapi.getUserData;
+    /**
+     * @deprecated since version 0.0.10.
+     * Will be removed in version 1.0.
+     */
+    Vue.prototype.$getUserData = function () {
+      console.warn('This Vue instance method is deprecated and will be removed in a future release. Please use $gapi.getUserData instead.');
+      return Vue.prototype.$gapi.getUserData
+    };
   }
 };
 
