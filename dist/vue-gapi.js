@@ -203,16 +203,16 @@ var VueGAPI = {
       },
       getOfflineAccessCode: getOfflineAccessCode,
       grantOfflineAccess: function () {
-        return this$1.$getGapiClient().then(grantOfflineAccess)
+        return this$1.getGapiClient().then(grantOfflineAccess)
       },
       login: function () {
-        return this$1.$getGapiClient().then(login)
+        return this$1.getGapiClient().then(login)
       },
       refreshToken: function () {
-        return this$1.$getGapiClient().then(refreshToken)
+        return this$1.getGapiClient().then(refreshToken)
       },
       logout: function () {
-        return this$1.$getGapiClient().then(logout)
+        return this$1.getGapiClient().then(logout)
       },
       isAuthenticated: isAuthenticated,
       getUserData: getUserData
