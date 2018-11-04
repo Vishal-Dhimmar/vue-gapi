@@ -216,13 +216,15 @@ var VueGAPI = {
       getUserData: getUserData
     };
 
+    var deprectedMsg = function (oldInstanceMethod, newInstanceMethod) { return ("The " + oldInstanceMethod + " Vue instance method is deprecated and will be removed in a future release. Please use " + newInstanceMethod + " instead."); };
+
     /**
      * @deprecated since version 0.0.10.
      * Will be removed in version 1.0.
      */
     Vue.prototype.$getGapiClient = function () {
-      console.warn('This Vue instance method is deprecated and will be removed in a future release. Please use $gapi.getGapiClient instead.');
-      return Vue.prototype.$gapi.getGapiClient
+      console.warn(deprectedMsg('$getGapiClient', '$gapi.getGapiClient'));
+      return Vue.prototype.$gapi.getGapiClient()
     };
 
     /**
@@ -230,8 +232,8 @@ var VueGAPI = {
      * Will be removed in version 1.0.
      */
     Vue.prototype.$login = function () {
-      console.warn('This Vue instance method is deprecated and will be removed in a future release. Please use $gapi.login instead.');
-      return Vue.prototype.$gapi.login
+      console.warn(deprectedMsg('$login', '$gapi.login'));
+      return Vue.prototype.$gapi.login()
     };
 
     /**
@@ -239,8 +241,8 @@ var VueGAPI = {
      * Will be removed in version 1.0.
      */
     Vue.prototype.$refreshToken = function () {
-      console.warn('This Vue instance method is deprecated and will be removed in a future release. Please use $gapi.refreshToken instead.');
-      return Vue.prototype.$gapi.refreshToken
+      console.warn(deprectedMsg('$refreshToken', '$gapi.refreshToken'));
+      return Vue.prototype.$gapi.refreshToken()
     };
 
     /**
@@ -248,8 +250,8 @@ var VueGAPI = {
      * Will be removed in version 1.0.
      */
     Vue.prototype.$logout = function () {
-      console.warn('This Vue instance method is deprecated and will be removed in a future release. Please use $gapi.logout instead.');
-      return Vue.prototype.$gapi.logout
+      console.warn(deprectedMsg('$logout', '$gapi.logout'));
+      return Vue.prototype.$gapi.logout()
     };
 
     /**
@@ -257,8 +259,8 @@ var VueGAPI = {
      * Will be removed in version 1.0.
      */
     Vue.prototype.$isAuthenticated = function () {
-      console.warn('This Vue instance method is deprecated and will be removed in a future release. Please use $gapi.isAuthenticated instead.');
-      return Vue.prototype.$gapi.isAuthenticated
+      console.warn(deprectedMsg('$isAuthenticated', '$gapi.isAuthenticated'));
+      return Vue.prototype.$gapi.isAuthenticated()
     };
 
     /**
@@ -266,8 +268,8 @@ var VueGAPI = {
      * Will be removed in version 1.0.
      */
     Vue.prototype.$getUserData = function () {
-      console.warn('This Vue instance method is deprecated and will be removed in a future release. Please use $gapi.getUserData instead.');
-      return Vue.prototype.$gapi.getUserData
+      console.warn(deprectedMsg('$getUserData', '$gapi.getUserData'));
+      return Vue.prototype.$gapi.getUserData()
     };
   }
 };
