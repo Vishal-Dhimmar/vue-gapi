@@ -151,8 +151,6 @@ var refreshToken = googleAuthService.refreshToken;
 
 var VueGAPI = {
   install: function (Vue, clientConfig) {
-    var this$1 = this;
-
     Vue.gapiLoadClientPromise = null;
 
     var resolveAuth2Client = function (resolve, reject) {
@@ -201,16 +199,16 @@ var VueGAPI = {
       },
       getOfflineAccessCode: getOfflineAccessCode,
       grantOfflineAccess: function () {
-        return this$1.getGapiClient().then(grantOfflineAccess)
+        return Vue.prototype.$gapi.getGapiClient().then(grantOfflineAccess)
       },
       login: function () {
-        return this$1.getGapiClient().then(login)
+        return Vue.prototype.$gapi.getGapiClient().then(login)
       },
       refreshToken: function () {
-        return this$1.getGapiClient().then(refreshToken)
+        return Vue.prototype.$gapi.getGapiClient().then(refreshToken)
       },
       logout: function () {
-        return this$1.getGapiClient().then(logout)
+        return Vue.prototype.$gapi.getGapiClient().then(logout)
       },
       isAuthenticated: isAuthenticated,
       getUserData: getUserData
